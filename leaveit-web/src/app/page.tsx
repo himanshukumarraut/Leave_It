@@ -14,8 +14,10 @@ export default function Home() {
 
     const role = (session as any)?.user?.role as string | undefined;
 
-    if (!session || !role) return; // show landing when not logged in
+    // If not logged in, stay on landing page
+    if (!session) return;
 
+    // If role is present, route by role; otherwise default to employee dashboard
     if (role === "manager") {
       router.replace("/management/dashboard");
     } else {
