@@ -30,7 +30,7 @@ export default function ManagementDashboard() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/leaves/pending");
+        const res = await fetch("https://leave-it-wmz2.onrender.com/api/leaves/pending");
         if (!res.ok) throw new Error("Failed to load data");
         const data = await res.json();
         setLeaves(data);
@@ -46,7 +46,7 @@ export default function ManagementDashboard() {
 
   async function handleAction(id: string, action: "approve" | "reject") {
     try {
-      const res = await fetch(`http://localhost:4000/api/leaves/${id}`, {
+      const res = await fetch(`https://leave-it-wmz2.onrender.com/api/leaves/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),

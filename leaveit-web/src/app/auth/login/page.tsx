@@ -20,7 +20,7 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
+      const res = await fetch("https://leave-it-wmz2.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId, password }),

@@ -40,7 +40,7 @@ export default function EmployeeDashboard() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:4000/api/leaves/employee/${employeeId}`);
+        const res = await fetch(`https://leave-it-wmz2.onrender.com/api/leaves/employee/${employeeId}`);
         if (!res.ok) throw new Error("Failed to load data");
         const data = await res.json();
         setEmployee(data.employee);
@@ -67,7 +67,7 @@ export default function EmployeeDashboard() {
         reason: formData.get("reason") as string,
       };
 
-      const res = await fetch("http://localhost:4000/api/leaves", {
+      const res = await fetch("https://leave-it-wmz2.onrender.com/api/leaves", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -79,7 +79,7 @@ export default function EmployeeDashboard() {
       }
 
       // reload
-      const refreshed = await fetch(`http://localhost:4000/api/leaves/employee/${employeeId}`);
+      const refreshed = await fetch(`https://leave-it-wmz2.onrender.com/api/leaves/employee/${employeeId}`);
       const data = await refreshed.json();
       setEmployee(data.employee);
       setLeaves(data.leaves);
