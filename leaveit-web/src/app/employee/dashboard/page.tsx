@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../auth-context";
 
 interface Leave {
   _id: string;
@@ -21,7 +21,7 @@ interface EmployeeInfo {
 }
 
 export default function EmployeeDashboard() {
-  const { data: session, status } = useSession();
+  const { user, setUser } = useAuth();
   const router = useRouter();
   const [employee, setEmployee] = useState<EmployeeInfo | null>(null);
   const [leaves, setLeaves] = useState<Leave[]>([]);
@@ -29,13 +29,12 @@ export default function EmployeeDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (!session || (session as any).user.role !== "employee") {
+    if (!user || user.role !== "employee") {
       router.replace("/auth/login");
       return;
     }
 
-    const employeeId = (session as any).user.employeeId as string;
+    const employeeId = user.employeeId;
 
     async function fetchData() {
       setLoading(true);
@@ -54,11 +53,11 @@ export default function EmployeeDashboard() {
     }
 
     fetchData();
-  }, [session, status, router]);
+  }, [user, router]);
 
   async function handleCreateLeave(formData: FormData) {
-    if (!session) return;
-    const employeeId = (session as any).user.employeeId as string;
+    if (!user) return;
+    const employeeId = user.employeeId;
 
     try {
       const payload = {
@@ -89,7 +88,7 @@ export default function EmployeeDashboard() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">Loading...</div>;
   }
 
@@ -106,7 +105,10 @@ export default function EmployeeDashboard() {
             {employee.name} ({employee.employeeId})
           </span>
           <button
-            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            onClick={() => {
+              setUser(null);
+              router.replace("/auth/login");
+            }}
             className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-100"
           >
             Sign out

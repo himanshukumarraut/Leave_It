@@ -1,32 +1,26 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./auth-context";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { user } = useAuth();
   const router = useRouter();
 
   // If logged in, redirect by role
   useEffect(() => {
-    if (status === "loading") return;
+    if (!user) return;
 
-    const role = (session as any)?.user?.role as string | undefined;
-
-    // If not logged in, stay on landing page
-    if (!session) return;
-
-    // If role is present, route by role; otherwise default to employee dashboard
-    if (role === "manager") {
+    if (user.role === "manager") {
       router.replace("/management/dashboard");
     } else {
       router.replace("/employee/dashboard");
     }
-  }, [session, status, router]);
+  }, [user, router]);
 
   // Landing page UI when not logged in
-  if (!session) {
+  if (!user) {
     return (
       <div className="min-h-screen flex flex-col text-slate-900" style={{
         background: "radial-gradient(circle at top left, #e0e7ff 0, #f9fafb 40%, #ffffff 100%)",

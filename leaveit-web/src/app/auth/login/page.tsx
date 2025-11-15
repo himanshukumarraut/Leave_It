@@ -1,11 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,22 +19,39 @@ export default function LoginPage() {
     const employeeId = formData.get("employeeId") as string;
     const password = formData.get("password") as string;
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      employeeId,
-      password,
-    });
+    try {
+      const res = await fetch("http://localhost:4000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId, password }),
+      });
 
-    setLoading(false);
+      if (!res.ok) {
+        setError("Invalid employee ID or password");
+        setLoading(false);
+        return;
+      }
 
-    if (!res || res.error) {
-      setError("Invalid employee ID or password");
-      return;
+      const user = await res.json();
+      setUser({
+        id: user.id,
+        employeeId: user.employeeId,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      });
+
+      setLoading(false);
+
+      if (user.role === "manager") {
+        router.push("/management/dashboard");
+      } else {
+        router.push("/employee/dashboard");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
-
-    // Decide route based on role in a follow-up client fetch
-    // For now, go to a common landing page that will redirect by role
-    router.push("/");
   }
 
   return (

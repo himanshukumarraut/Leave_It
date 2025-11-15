@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../auth-context";
 
 interface Leave {
   _id: string;
@@ -14,15 +14,14 @@ interface Leave {
 }
 
 export default function ManagementDashboard() {
-  const { data: session, status } = useSession();
+  const { user, setUser } = useAuth();
   const router = useRouter();
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (!session || (session as any).user.role !== "manager") {
+    if (!user || user.role !== "manager") {
       router.replace("/auth/login");
       return;
     }
@@ -43,7 +42,7 @@ export default function ManagementDashboard() {
     }
 
     fetchData();
-  }, [session, status, router]);
+  }, [user, router]);
 
   async function handleAction(id: string, action: "approve" | "reject") {
     try {
@@ -64,7 +63,7 @@ export default function ManagementDashboard() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">Loading...</div>;
   }
 
@@ -75,7 +74,10 @@ export default function ManagementDashboard() {
         <div className="flex items-center gap-4 text-sm text-slate-700">
           <span>Manager</span>
           <button
-            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            onClick={() => {
+              setUser(null);
+              router.replace("/auth/login");
+            }}
             className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium hover:bg-slate-100"
           >
             Sign out
